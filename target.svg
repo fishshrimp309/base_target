@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" role="img" aria-labelledby="title desc">
+  <title id="title">RoboMaster 基地飞镖靶仿制图</title>
+  <desc id="desc">仿制 RoboMaster 基地飞镖靶的同心环与分区示意图。</desc>
+
+  <rect width="800" height="800" fill="#111827"/>
+
+  <!-- Outer frame -->
+  <circle cx="400" cy="400" r="330" fill="#0f172a" stroke="#e5e7eb" stroke-width="8"/>
+
+  <!-- Concentric target rings -->
+  <circle cx="400" cy="400" r="280" fill="#1d4ed8"/>
+  <circle cx="400" cy="400" r="220" fill="#2563eb"/>
+  <circle cx="400" cy="400" r="165" fill="#dc2626"/>
+  <circle cx="400" cy="400" r="115" fill="#ef4444"/>
+  <circle cx="400" cy="400" r="70" fill="#facc15"/>
+  <circle cx="400" cy="400" r="36" fill="#fef08a"/>
+
+  <!-- Cross split lines -->
+  <line x1="70" y1="400" x2="730" y2="400" stroke="#f9fafb" stroke-width="6" opacity="0.9"/>
+  <line x1="400" y1="70" x2="400" y2="730" stroke="#f9fafb" stroke-width="6" opacity="0.9"/>
+
+  <!-- Diagonal split lines -->
+  <line x1="165" y1="165" x2="635" y2="635" stroke="#f9fafb" stroke-width="4" opacity="0.75"/>
+  <line x1="635" y1="165" x2="165" y2="635" stroke="#f9fafb" stroke-width="4" opacity="0.75"/>
+
+  <!-- Center mark -->
+  <circle cx="400" cy="400" r="12" fill="#111827" stroke="#f8fafc" stroke-width="3"/>
+
+  <!-- Score labels -->
+  <g fill="#f8fafc" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700" text-anchor="middle" dominant-baseline="middle">
+    <text x="400" y="128">1</text>
+    <text x="672" y="400">2</text>
+    <text x="400" y="672">3</text>
+    <text x="128" y="400">4</text>
+  </g>
+</svg>
