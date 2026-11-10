@@ -8,9 +8,10 @@ Remote_Mode remote_mode;
 rc_info_t rc ={0};
 uint8_t DBUS_buf[DBUS_BUFLEN];
 
+extern osThreadId_t ErrorTaskHandle;
+
 int rc_restart_flag = 0;
 uint8_t isStop_flag = 1;
-uint8_t roll_start = 0;
 
 void DBUS_Uart_Init(UART_HandleTypeDef *huart)
 {
@@ -64,7 +65,7 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
     if (huart == &huart3)   
     {
         Rc_Handler(&rc, DBUS_buf);
-		rc_restart_flag = 0;
+				rc_restart_flag = 0;
     }
 	if (huart == &huart1)
 	{
@@ -74,21 +75,15 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
 
 void Task_RcCallback(void)
 {
-	if(rc.sw1 == 2 || (!roll_start))
+	if(rc.sw1 == 2)
 	{
 		isStop_flag = 1;
-		roll_start = 0;
+		osThreadResume(ErrorTaskHandle);
 	}
 	else
 	{
 		isStop_flag = 0;
-	}
-	
-	if((rc.sw1 != 2)&&(rc.roll > 400))
-	{
-		roll_start = 1;
-	}
-		
+	}	
 }
 	
 void OS_RcCallback(void *argument)
@@ -107,3 +102,27 @@ void OS_RcCallback(void *argument)
 		osDelay(15);
 	}
 }
+
+void OS_ErrorCallback(void const * argument)
+{
+	osThreadSuspend(ErrorTaskHandle);
+
+	for(;;)
+	{
+		HAL_Delay(1);
+		set_motor_current(&hcan1, CAN_CHASSIS_ID, 0, 0, 0, 0);
+		set_motor_current(&hcan1, CAN_GIMBAL_ID,  0, 0, 0, 0);
+		set_motor_current(&hcan2, CAN_GIMBAL_ID,  0, 0, 0, 0);
+		set_motor_current(&hcan2, CAN_SHOOTER_ID, 0, 0, 0, 0);
+		
+		if(rc_restart_flag >= 30)
+		{	
+			HAL_UARTEx_ReceiveToIdle_DMA(&DBUS_UART, DBUS_buf, DBUS_BUFLEN);
+			__HAL_DMA_DISABLE_IT(DBUS_UART.hdmarx, DMA_IT_HT);
+		}
+
+		if (rc.sw1 != 2 && rc.sw1 != 0)
+			HAL_NVIC_SystemReset(); 
+	}
+}
+

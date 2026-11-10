@@ -71,7 +71,7 @@ const osThreadAttr_t MotorTask_attributes = {
 /* Definitions for RamdomTask */
 osThreadId_t RamdomTaskHandle;
 const osThreadAttr_t RamdomTask_attributes = {
-  .name = "RandomTask",
+  .name = "RamdomTask",
   .stack_size = 1024 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
@@ -81,6 +81,13 @@ const osThreadAttr_t JudgeTask_attributes = {
   .name = "JudgeTask",
   .stack_size = 1024 * 4,
   .priority = (osPriority_t) osPriorityNormal,
+};
+/* Definitions for ErrorTask */
+osThreadId_t ErrorTaskHandle;
+const osThreadAttr_t ErrorTask_attributes = {
+  .name = "ErrorTask",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityRealtime,
 };
 
 /* Private function prototypes -----------------------------------------------*/
@@ -93,6 +100,7 @@ void OS_RcCallback(void *argument);
 void OS_MotorCallback(void *argument);
 void OS_RamdomCallback(void *argument);
 void OS_JudgeCallback(void *argument);
+void OS_ErrorCallback(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -137,6 +145,9 @@ void MX_FREERTOS_Init(void) {
 
   /* creation of JudgeTask */
   JudgeTaskHandle = osThreadNew(OS_JudgeCallback, NULL, &JudgeTask_attributes);
+
+  /* creation of ErrorTask */
+  ErrorTaskHandle = osThreadNew(OS_ErrorCallback, NULL, &ErrorTask_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -236,6 +247,24 @@ __weak void OS_JudgeCallback(void *argument)
     osDelay(1);
   }
   /* USER CODE END OS_JudgeCallback */
+}
+
+/* USER CODE BEGIN Header_OS_ErrorCallback */
+/**
+* @brief Function implementing the ErrorTask thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_OS_ErrorCallback */
+__weak void OS_ErrorCallback(void *argument)
+{
+  /* USER CODE BEGIN OS_ErrorCallback */
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1);
+  }
+  /* USER CODE END OS_ErrorCallback */
 }
 
 /* Private application code --------------------------------------------------*/
