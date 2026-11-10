@@ -1,0 +1,37 @@
+#include "pid.h"
+
+void pid_init(PID *pid,float kp,float ki,float kd,float i_max,float out_max)
+{
+  pid->kp      = kp;
+  pid->ki      = ki;
+  pid->kd      = kd;
+  pid->i_max   = i_max;
+  pid->out_max = out_max;
+}
+
+float pid_calc(PID *pid, float target, float measure)
+{
+  pid->target = target;
+  pid->measure = measure;
+  pid->err[1] = pid->err[0];
+  pid->err[0] = pid->target - pid->measure;
+  
+  pid->p_out  = pid->kp * pid->err[0];
+  pid->i_out += pid->ki * pid->err[0];
+  pid->d_out  = pid->kd * (pid->err[0] - pid->err[1]);
+  LIMIT_MIN_MAX(pid->i_out, -pid->i_max, pid->i_max);
+  
+  pid->output = pid->p_out + pid->i_out + pid->d_out;
+  LIMIT_MIN_MAX(pid->output, -pid->out_max, pid->out_max);
+  return pid->output;
+}
+
+void pid_clear(PID *pid)
+{
+//  pid->err[0] = 0;
+//  pid->err[1] = 0;
+  pid->i_out  = 0;
+  pid->p_out  = 0;
+  pid->d_out  = 0;
+  pid->output = 0;
+}
