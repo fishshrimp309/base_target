@@ -7,12 +7,11 @@
 #include "stm32f4xx_hal.h"
 #include <stdint.h>
 
-/* 一次换位的全部状态 */
-static float    start_teeth;      /* 本次换位起点（齿） */
-static float    goal_teeth;       /* 本次换位目标（齿） */
-static uint32_t start_move_t0_ms; /* 本次换位开始时刻 */
-static uint32_t move_ms;          /* 本次换位时长 */
-static uint8_t last_sw1 = 0xFF; 
+float start_teeth;     
+float goal_teeth;       
+uint32_t start_move_t0_ms; 
+uint32_t move_ms;        
+uint8_t last_sw1 = 0xFF; 
 
 /* 随机数状态 */
 static uint32_t s_rng;
@@ -54,8 +53,6 @@ static void update(void)
 {
     uint32_t now = HAL_GetTick();
     float ref, vel = 0.0f;
-
-    feedback();
 
     /* 换位中：最小 jerk 曲线给位置和速度前馈；结束后停在目标点 */
     if ((now - start_move_t0_ms) < move_ms)
@@ -101,7 +98,7 @@ void Random_MoveTo(float target_teeth, uint32_t time_ms)
     move_ms = (uint32_t)(1.875f * d / MAX_TEETH_PER_S * 1000.0f);
     if (move_ms < MOVE_TIME_MIN_MS) move_ms = MOVE_TIME_MIN_MS;
     if (move_ms > time_ms)          move_ms = time_ms;
-    if (move_ms == 0u)              move_ms = 1u;
+    if (move_ms == 0)              move_ms = 1;
 }
 
 
@@ -125,17 +122,23 @@ void Random_MoveToRandom(uint32_t time_ms)
 void Random_MoveContinuous(uint32_t time_ms)
 {
     if (!Random_IsBusy()) 
+    {
         Random_MoveToRandom(time_ms);
+        move_ms = time_ms;
+    }
 }
 
 uint8_t Random_IsBusy(void)
 {
-    return ((HAL_GetTick() - start_move_t0_ms) < move_ms) ? 1u : 0u;
+    return ((HAL_GetTick() - start_move_t0_ms) < move_ms) ? 1 : 0;
 }
 
 void Rocker_Ctrl(void)
 {
     motor_3508.targetSpeed = -rc.ch0 * 600;
+		motor_3508.totalAngle = 0;
+		goal_teeth = 0;
+		start_teeth = 0;
 }
 
 void Random_Fix_Ctrl(void)
@@ -170,7 +173,7 @@ void Random_Move_Ctrl(void)
         }
         else if (state == 1)
         {
-            Random_MoveContinuous(1000); 
+            Random_MoveContinuous(2000); 
         }
         else if (state == 2 && ((USER_JudgeData.hit_myself == 1) || ((HAL_GetTick() - launch_ms) >= 10000)))
         {
@@ -203,7 +206,7 @@ void Terminal_Random_Move_Ctrl(void)
         }
         else if(state == 1)
         {
-            Random_MoveContinuous(1000);
+            Random_MoveContinuous(2000);
         }
         else if(state == 2)
         {
@@ -226,6 +229,8 @@ void Terminal_Random_Move_Ctrl(void)
 
 void Task_RandomCallback(void)
 {
+  feedback();
+	
 	if((rc.ch3 < 0.3) && (rc.ch3 > -0.3))
 	{
 		if(rc.sw2 == 2)
@@ -234,7 +239,7 @@ void Task_RandomCallback(void)
 		}
 		else if (rc.sw2 == 3)
 		{
-?			Random_Move_Ctrl();
+			Random_Move_Ctrl();
 		}
 		else if (rc.sw2 == 1)
 		{

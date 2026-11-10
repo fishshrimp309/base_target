@@ -7,7 +7,7 @@
 /* 电机输出轴齿数：输出轴转一圈，齿条走 PINION_TEETH 齿 */
 #define PINION_TEETH   25.0f
 /* 靶子单侧行程齿数（上电位置为 0，左右对称） */
-#define RANDOM_RANGE_TEETH 30.0f
+#define RANDOM_RANGE_TEETH 25.0f
 
 /* M3508 内部减速比 3591:187。CAN 反馈是减速前的转子值，位置换算要除以它 */
 #define GEAR_3508      (3591.0f / 187.0f)
